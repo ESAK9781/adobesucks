@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fuckadobe</title>
+<meta name="description" content="A dependency-light CLI that strips Adobe's security theater out of PDFs.">
+<style>
+  :root {
+    --bg: #0b0c0f;
+    --bg-panel: #14161b;
+    --border: #24272e;
+    --text: #e7e9ee;
+    --text-dim: #9aa0ac;
+    --accent: #ff5d5d;
+    --accent-2: #58c9ff;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  a { color: var(--accent-2); }
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  header.hero {
+    padding: 72px 0 40px;
+    border-bottom: 1px solid var(--border);
+  }
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .04em;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    padding: 3px 10px;
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(2.2rem, 6vw, 3.4rem);
+    margin: 0 0 14px;
+    letter-spacing: -0.02em;
+  }
+  h1 span { color: var(--accent); }
+  .tagline {
+    font-size: 1.15rem;
+    color: var(--text-dim);
+    max-width: 60ch;
+    margin: 0 0 28px;
+  }
+  .cta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #180000;
+  }
+  .btn:hover { filter: brightness(1.1); }
+
+  section { padding: 48px 0; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h2 {
+    font-size: 1.5rem;
+    margin: 0 0 20px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .card h3 {
+    margin: 0 0 8px;
+    font-size: 1.05rem;
+    font-family: var(--mono);
+  }
+  .card p { margin: 0; color: var(--text-dim); font-size: .95rem; }
+
+  pre {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: .9rem;
+    line-height: 1.5;
+  }
+  code { font-family: var(--mono); }
+  .comment { color: var(--text-dim); }
+
+  ul.limits { color: var(--text-dim); padding-left: 20px; }
+  ul.limits li { margin-bottom: 10px; }
+
+  footer {
+    padding: 32px 0 60px;
+    color: var(--text-dim);
+    font-size: .9rem;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <span class="badge">CLI &middot; ONE DEPENDENCY &middot; MIT</span>
+      <h1>fuck<span>adobe</span></h1>
+      <p class="tagline">
+        A small, dependency-light CLI that strips Adobe's security theater
+        out of PDFs — locked form fields, post-signature locks, usage-rights
+        restrictions, and portfolio wrapping — so any other program (or
+        person) can actually use the file.
+      </p>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/ESAK9781/adobesucks">View on GitHub</a>
+        <a class="btn" href="#usage">Usage</a>
+      </div>
+    </header>
+
+    <section id="modes">
+      <h2>Two modes</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>normal (default)</h3>
+          <p>
+            Keeps every field, value, and signature exactly as-is. Strips
+            encryption, owner-password permissions, field &amp; signature
+            locks, and Adobe's usage-rights/certification extensions.
+          </p>
+        </div>
+        <div class="card">
+          <h3>nuclear <span class="comment">-m nuclear</span></h3>
+          <p>
+            For files too mangled to trust: rasterizes every page, discards
+            every original PDF object, and rebuilds a fresh AcroForm on top
+            — same fields, same positions, blank and unsigned.
+          </p>
+        </div>
+        <div class="card">
+          <h3>portfolios</h3>
+          <p>
+            Any PDF portfolio is automatically collapsed into one conjoined
+            PDF: cover pages plus every embedded file, appended in order.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="usage">
+      <h2>Usage</h2>
+      <pre><span class="comment"># install</span>
+pip install .
+
+<span class="comment"># unlock a signed, field-locked form in place</span>
+fuckadobe locked-contract.pdf
+<span class="comment"># -&gt; locked-contract_deadobe.pdf</span>
+
+<span class="comment"># nuke a file that's beyond trusting; get a clean, blank, refillable copy</span>
+fuckadobe mangled-form.pdf -m nuclear --dpi 300
+<span class="comment"># -&gt; mangled-form_nuclear.pdf</span>
+
+<span class="comment"># collapse a portfolio and merge in a cover sheet</span>
+fuckadobe cover.pdf case-portfolio.pdf -o case-combined.pdf
+
+<span class="comment"># open a PDF that needs a password first</span>
+fuckadobe encrypted.pdf -p correct-horse-battery-staple</pre>
+    </section>
+
+    <section id="how">
+      <h2>What normal mode actually removes</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>/Lock</h3>
+          <p>Field lock dictionaries, cleared up the /Parent chain so shared/radio-group locks go too.</p>
+        </div>
+        <div class="card">
+          <h3>ReadOnly flag</h3>
+          <p>The bit Adobe sets on fields after a signature "locks" them.</p>
+        </div>
+        <div class="card">
+          <h3>AppendOnly</h3>
+          <p>AcroForm SigFlags bit that forces incremental-only updates.</p>
+        </div>
+        <div class="card">
+          <h3>/Perms &amp; /Extensions</h3>
+          <p>UR3 usage rights, DocMDP certification, Reader-extension markers.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="limits">
+      <h2>Limitations</h2>
+      <ul class="limits">
+        <li>Doesn't crack passwords you don't know — a PDF that needs a password to <em>open</em> still needs <code>-p</code>.</li>
+        <li>Nuclear mode is intentionally lossy: a page raster plus a freshly built form layer, not a byte-faithful copy.</li>
+        <li>Non-PDF, non-image portfolio attachments get a placeholder page rather than inline rendering.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <span>MIT licensed.</span>
+      <span><a href="https://github.com/ESAK9781/adobesucks">github.com/ESAK9781/adobesucks</a></span>
+    </footer>
+  </div>
+</body>
+</html>

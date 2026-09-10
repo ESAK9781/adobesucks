@@ -1,0 +1,18 @@
+[project]
+name = "fuckadobe"
+version = "0.1.0"
+description = "Strip Adobe security theater from PDFs: unlock locked form fields/signatures, or nuke the whole document to a flat re-fillable copy."
+requires-python = ">=3.9"
+dependencies = [
+    "pymupdf>=1.24.0",
+]
+
+[project.scripts]
+fuckadobe = "fuckadobe.cli:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["fuckadobe*"]
