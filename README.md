@@ -27,7 +27,8 @@ binaries, no Poppler, no Ghostscript.
 - **Nuclear mode** (`-m nuclear`) — for when a file is too mangled to trust:
   rasterizes every page to an image, throws away every original PDF object,
   and rebuilds a brand-new document with a fresh AcroForm laid on top —
-  same field names, types, and positions, but blank and unsigned.
+  same field names, types, and positions, pre-filled with the original
+  values, but unsigned.
 
 - **Portfolios** — any PDF portfolio (a collection of embedded files) is
   automatically collapsed into one conjoined PDF: the cover pages plus
@@ -64,11 +65,12 @@ fuckadobe locked-contract.pdf
 # -> locked-contract_deadobe.pdf
 ```
 
-Nuke a file that's beyond trusting and get a clean, blank, refillable copy:
+Nuke a file that's beyond trusting and get a clean, refillable copy with
+the original values intact:
 
 ```bash
 fuckadobe mangled-form.pdf -m nuclear --dpi 300
-# -> mangled-form_nuclear.pdf
+# -> mangled-form_nuked.pdf
 ```
 
 Collapse a portfolio and merge in an extra cover sheet:

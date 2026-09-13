@@ -12,7 +12,7 @@ from .portfolio import collapse_portfolio, is_portfolio
 
 def _derive_output(first_input, mode):
     base, _ext = os.path.splitext(first_input)
-    suffix = "_nuclear" if mode == "nuclear" else "_deadobe"
+    suffix = "_nuked" if mode == "nuclear" else "_deadobe"
     return f"{base}{suffix}.pdf"
 
 
@@ -22,17 +22,19 @@ def build_parser():
         description=(
             "Strip Adobe security theater from PDFs. Normal mode unlocks "
             "locked fields/signatures in place; nuclear mode rasterizes "
-            "every page and rebuilds a fresh, blank/unsigned AcroForm on "
-            "top. Portfolios (embedded-file collections) are always "
-            "collapsed into one conjoined PDF first."
+            "every page and rebuilds a fresh, unsigned AcroForm on top, "
+            "pre-filled with the original field values. Portfolios "
+            "(embedded-file collections) are always collapsed into one "
+            "conjoined PDF first."
         ),
     )
     p.add_argument("input", nargs="+", help="input PDF(s); multiple files are concatenated in order")
-    p.add_argument("-o", "--output", help="output path (default: <first input>_deadobe.pdf / _nuclear.pdf)")
+    p.add_argument("-o", "--output", help="output path (default: <first input>_deadobe.pdf / _nuked.pdf)")
     p.add_argument(
         "-m", "--mode", choices=["normal", "nuclear"], default="normal",
         help="normal: unlock existing fields/signatures in place (default). "
-             "nuclear: flatten every page to an image and re-add blank, unsigned fields.",
+             "nuclear: flatten every page to an image and re-add unsigned fields "
+             "pre-filled with their original values.",
     )
     p.add_argument("-p", "--password", help="password to open an encrypted input PDF")
     p.add_argument("--dpi", type=int, default=200, help="render resolution for nuclear mode (default: 200)")

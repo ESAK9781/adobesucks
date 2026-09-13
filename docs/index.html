@@ -164,7 +164,8 @@
           <p>
             For files too mangled to trust: rasterizes every page, discards
             every original PDF object, and rebuilds a fresh AcroForm on top
-            — same fields, same positions, blank and unsigned.
+            — same fields, same positions, pre-filled with the original
+            values, but unsigned.
           </p>
         </div>
         <div class="card">
@@ -186,9 +187,9 @@ pip install .
 fuckadobe locked-contract.pdf
 <span class="comment"># -&gt; locked-contract_deadobe.pdf</span>
 
-<span class="comment"># nuke a file that's beyond trusting; get a clean, blank, refillable copy</span>
+<span class="comment"># nuke a file that's beyond trusting; get a clean, refillable copy with the original values intact</span>
 fuckadobe mangled-form.pdf -m nuclear --dpi 300
-<span class="comment"># -&gt; mangled-form_nuclear.pdf</span>
+<span class="comment"># -&gt; mangled-form_nuked.pdf</span>
 
 <span class="comment"># collapse a portfolio and merge in a cover sheet</span>
 fuckadobe cover.pdf case-portfolio.pdf -o case-combined.pdf

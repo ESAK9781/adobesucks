@@ -1,6 +1,6 @@
 """Nuclear mode: rasterize every page so no original PDF object (locked
 or not) survives, then rebuild a fresh AcroForm on top with the same
-fields back in place, blank and unsigned."""
+fields back in place, pre-filled with their old values but unsigned."""
 
 import pymupdf
 
@@ -13,8 +13,9 @@ _READONLY_BIT = 1
 
 
 def _capture_fields(doc):
-    """Collect field metadata per page before rasterizing, since widgets
-    disappear once we throw away the original page objects."""
+    """Collect field metadata (including current values) per page before
+    rasterizing, since widgets disappear once we throw away the original
+    page objects."""
     fields_by_page = []
     for page in doc:
         specs = []
@@ -30,10 +31,26 @@ def _capture_fields(doc):
                     "text_font": widget.text_font,
                     "text_fontsize": widget.text_fontsize,
                     "border_width": widget.border_width,
+                    "value": widget.field_value,
                 }
             )
         fields_by_page.append(specs)
     return fields_by_page
+
+
+def _blank_fields(doc):
+    """Remove every widget annotation before rasterizing so the flattened
+    background can't carry the old field contents baked into it as an
+    image. Setting field_value + update() is not enough: PyMuPDF doesn't
+    reliably rewrite the widget's stored appearance stream, so the old
+    value keeps rendering. Deleting the annotation outright does work, and
+    the fields are gone from the source doc anyway once captured — the
+    freshly created widgets in the rebuilt doc get the captured values
+    re-applied afterward."""
+    for page in doc:
+        widget = next(page.widgets(), None)
+        while widget is not None:
+            widget = page.delete_widget(widget)
 
 
 def _rasterize(doc, dpi):
@@ -64,20 +81,23 @@ def _add_widget(page, spec):
     ) and spec["choice_values"]:
         widget.choice_values = spec["choice_values"]
 
-    if spec["type"] == pymupdf.PDF_WIDGET_TYPE_CHECKBOX:
-        widget.field_value = False
-    elif spec["type"] == pymupdf.PDF_WIDGET_TYPE_RADIOBUTTON:
-        widget.field_value = False
+    value = spec["value"]
+    if spec["type"] in (
+        pymupdf.PDF_WIDGET_TYPE_CHECKBOX,
+        pymupdf.PDF_WIDGET_TYPE_RADIOBUTTON,
+    ):
+        widget.field_value = value if value and value != "Off" else False
     elif spec["type"] == pymupdf.PDF_WIDGET_TYPE_SIGNATURE:
         pass  # leave unset -> unsigned
     else:
-        widget.field_value = ""
+        widget.field_value = value or ""
 
     page.add_widget(widget)
 
 
 def flatten_and_rebuild(doc, dpi=200):
     fields_by_page = _capture_fields(doc)
+    _blank_fields(doc)
     rendered_pages = _rasterize(doc, dpi)
     metadata = doc.metadata
 
