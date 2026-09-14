@@ -225,6 +225,7 @@ fuckadobe encrypted.pdf -p correct-horse-battery-staple</pre>
       <ul class="limits">
         <li>Doesn't crack passwords you don't know — a PDF that needs a password to <em>open</em> still needs <code>-p</code>.</li>
         <li>Nuclear mode is intentionally lossy: a page raster plus a freshly built form layer, not a byte-faithful copy.</li>
+        <li>Dynamic XFA forms are refused outright — their real content is XML only Adobe's renderer turns into pages, so there's nothing real to unlock or rasterize. Hybrid XFA forms (with a real static fallback) are unaffected.</li>
         <li>Non-PDF, non-image portfolio attachments get a placeholder page rather than inline rendering.</li>
       </ul>
     </section>

@@ -74,6 +74,38 @@ def clean_acroform(doc):
         doc.xref_set_key(cat, "AcroForm", new_val)
 
 
+def is_dynamic_xfa(doc):
+    """True if this is a dynamic XFA form: its real content is XML that
+    only Adobe's own renderer turns into pages at open time. The static
+    page content every other renderer (including this tool) sees is just
+    Adobe's 'Please wait...' placeholder, so there's nothing real to
+    unlock or rasterize.
+
+    /NeedsRendering true is the direct, documented signal for this. A
+    hybrid XFA form (XFA data alongside a real static AcroForm fallback,
+    the common case from Acrobat) doesn't set it and has actual widgets,
+    so it's left alone -- we only fall back to "has XFA but no widgets at
+    all" as a second signal for forms that omit the flag.
+    """
+    cat = doc.pdf_catalog()
+    typ, val = doc.xref_get_key(cat, "NeedsRendering")
+    if typ == "bool" and val == "true":
+        return True
+
+    af_xref, inline = _acroform_target(doc)
+    if af_xref is not None:
+        typ, _ = doc.xref_get_key(af_xref, "XFA")
+        has_xfa = typ not in (None, "null")
+    elif inline is not None:
+        has_xfa = "/XFA" in inline
+    else:
+        has_xfa = False
+
+    if not has_xfa:
+        return False
+    return not any(True for page in doc for _ in page.widgets())
+
+
 def clean_catalog(doc):
     """Strip Adobe Reader-extension / certification cruft at the document
     level: usage rights (UR3), DocMDP certification, Reader-extension

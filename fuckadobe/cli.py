@@ -6,7 +6,7 @@ import pymupdf
 
 from .normal import unlock
 from .nuclear import flatten_and_rebuild
-from .pdfutil import open_pdf, save_stripped, warn
+from .pdfutil import is_dynamic_xfa, open_pdf, save_stripped, warn
 from .portfolio import collapse_portfolio, is_portfolio
 
 
@@ -47,6 +47,14 @@ def build_parser():
 
 def _load_one(path, args):
     doc = open_pdf(path, args.password)
+    if is_dynamic_xfa(doc):
+        raise SystemExit(
+            f"'{path}' is a dynamic XFA form: its real content is XML that "
+            "only Adobe's own renderer turns into pages. What every other "
+            "viewer (and this tool) sees as the page is just Adobe's "
+            "'Please wait...' placeholder, so there's nothing real here to "
+            "unlock or rasterize."
+        )
     if is_portfolio(doc):
         if args.no_collapse_portfolio:
             raise SystemExit(

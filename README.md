@@ -96,6 +96,12 @@ fuckadobe encrypted.pdf -p correct-horse-battery-staple
   freshly built form layer, not a byte-faithful copy. Some exotic widget
   types (e.g. certain signature appearances on older readers) may not be
   recreatable and are skipped with a warning rather than failing the run.
+- Dynamic XFA forms are refused outright: their real content is XML that
+  only Adobe's own renderer turns into pages at open time, so the "page"
+  every other tool (including this one) sees is just Adobe's
+  "Please wait..." placeholder — there's nothing real to unlock or
+  rasterize. Hybrid XFA forms (XFA data alongside a real static AcroForm
+  fallback, the common case) are unaffected.
 - Non-PDF, non-image attachments inside a portfolio can't be rendered
   inline (no extra dependencies for arbitrary format conversion) and are
   replaced with a placeholder page naming the file.
