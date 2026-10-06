@@ -37,7 +37,10 @@ binaries, no Poppler, no Ghostscript.
   being silently dropped.
 
 - **Multiple inputs** are concatenated, in the order given, before mode
-  processing runs — same mechanism as portfolio collapsing.
+  processing runs — same mechanism as portfolio collapsing. In normal
+  mode, certificate signature fields are cleared by concatenation (a warning
+  is printed). In nuclear mode each input is nuked first, so filled
+  signatures are rendered into the pages before merging.
 
 ## Install
 

@@ -12,6 +12,13 @@ from .pdfutil import clean_catalog, warn
 _READONLY_BIT = 1
 
 
+def _is_filled_signature(widget):
+    return (
+        widget.field_type == pymupdf.PDF_WIDGET_TYPE_SIGNATURE
+        and widget.is_signed
+    )
+
+
 def _capture_fields(doc):
     """Collect field metadata (including current values) per page before
     rasterizing, since widgets disappear once we throw away the original
@@ -20,6 +27,8 @@ def _capture_fields(doc):
     for page in doc:
         specs = []
         for widget in page.widgets() or []:
+            if _is_filled_signature(widget):
+                continue  # rendered into the page image instead
             specs.append(
                 {
                     "name": widget.field_name,
@@ -48,9 +57,12 @@ def _blank_fields(doc):
     freshly created widgets in the rebuilt doc get the captured values
     re-applied afterward."""
     for page in doc:
-        widget = next(page.widgets(), None)
-        while widget is not None:
-            widget = page.delete_widget(widget)
+        # Filled signature widgets are left in place so their appearance (the
+        # visible signature) is rasterized into the page. They are not
+        # recreated as fields afterward.
+        for widget in list(page.widgets() or []):
+            if not _is_filled_signature(widget):
+                page.delete_widget(widget)
 
 
 def _rasterize(doc, dpi):

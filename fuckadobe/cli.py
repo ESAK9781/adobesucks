@@ -67,14 +67,41 @@ def _load_one(path, args):
     return doc
 
 
+def _count_signature_fields(doc):
+    return sum(
+        1
+        for page in doc
+        for w in page.widgets() or []
+        if w.field_type == pymupdf.PDF_WIDGET_TYPE_SIGNATURE
+    )
+
+
 def main(argv=None):
     args = build_parser().parse_args(argv)
 
     docs = [_load_one(path, args) for path in args.input]
 
-    if len(docs) == 1:
+    if args.mode == "nuclear" and len(docs) > 1:
+        # Nuke each input on its own so filled signatures are rendered into
+        # their pages before merging (merging first would drop them).
+        working = pymupdf.open()
+        for d in docs:
+            nuked = flatten_and_rebuild(d, dpi=args.dpi)
+            d.close()
+            working.insert_pdf(nuked)
+            nuked.close()
+    elif len(docs) == 1:
         working = docs[0]
     else:
+        for path, d in zip(args.input, docs):
+            n = _count_signature_fields(d)
+            if n:
+                warn(
+                    f"'{path}' has {n} certificate/signature field(s). "
+                    "Concatenating PDFs rewrites the file, which invalidates "
+                    "signatures, and the merged output does not carry the "
+                    "signature fields over: they will be cleared."
+                )
         working = pymupdf.open()
         for d in docs:
             working.insert_pdf(d)
@@ -85,6 +112,8 @@ def main(argv=None):
 
     if args.mode == "normal":
         result = unlock(working)
+    elif len(docs) > 1:
+        result = working  # already nuked per input
     else:
         result = flatten_and_rebuild(working, dpi=args.dpi)
 
