@@ -42,6 +42,13 @@ binaries, no Poppler, no Ghostscript.
   is printed). In nuclear mode each input is nuked first, so filled
   signatures are rendered into the pages before merging.
 
+- **Directory input** (e.g. `./`) processes every PDF directly inside that
+  directory one at a time, each to its own `_deadobe.pdf` / `_nuked.pdf`.
+  No recursion into subdirectories and no concatenation. Files that already
+  end in `_deadobe.pdf` / `_nuked.pdf` are skipped, and a file that fails
+  (e.g. a dynamic XFA form) is reported and skipped without stopping the
+  rest.
+
 ## Install
 
 ```bash
@@ -80,6 +87,13 @@ Collapse a portfolio and merge in an extra cover sheet:
 
 ```bash
 fuckadobe cover.pdf case-portfolio.pdf -o case-combined.pdf
+```
+
+Unlock every PDF in the current directory, each to its own output:
+
+```bash
+fuckadobe ./
+# -> a_deadobe.pdf, b_deadobe.pdf, ...
 ```
 
 Open a PDF that needs a password first:
